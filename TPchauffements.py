@@ -9,12 +9,12 @@ def salutation(nom, age):
 
 #fonction power_2
 def power_2(limit):
-    i = 0
-    powers = []
-    while i <= limit:
-        powers.append(str(2 ** i))
-        i += 1
-    print(','.join(powers))
+    result = [0]
+    power = 1
+    while 2 ** power <= limit:
+        result.append(2 ** power)
+        power += 1
+    print(','.join(map(str, result)))
 
 #fonction check_ip_format
 def check_ip_format(ip):

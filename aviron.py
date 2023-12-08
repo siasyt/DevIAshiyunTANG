@@ -1,78 +1,78 @@
-import random
+class Bateau:
+    def __init__(self, nom, vitesse):
+        self.nom = nom
+        self.vitesse = vitesse
+        self.distance_parcourue = 0
 
-class RowingBoat:
-    def __init__(self, boat_name, average_speed):
-        self.boat_name = boat_name
-        self.average_speed = average_speed
-        self.distance_covered = 0
+    def avancer(self):
+        self.distance_parcourue += self.vitesse / 120 
 
-    def row(self):
-        self.distance_covered += self.average_speed / 2 
+    def afficher_position(self):
+        return f"# {self.nom},{int(self.distance_parcourue * 500)}"
 
-    def distance(self):
-        return self.distance_covered
+class Bateau2x(Bateau):
+    def __init__(self, nom, vitesse):
+        super().__init__(nom, vitesse)
 
-    def name(self):
-        return self.boat_name
+    def type_bateau(self):
+        return "2x"
 
+class BateauSkiff(Bateau):
+    def __init__(self, nom, vitesse):
+        super().__init__(nom, vitesse)
 
-class DoubleScullBoat(RowingBoat):
-    def __init__(self, boat_name, average_speed):
-        super().__init__(boat_name, average_speed)
+    def type_bateau(self):
+        return "1x"
 
+class Course:
+    def __init__(self, type_course):
+        self.type_course = type_course
+        self.bateaux = []
+        self.terminee = False
 
-class SingleScullBoat(RowingBoat):
-    def __init__(self, boat_name, average_speed):
-        super().__init__(boat_name, average_speed)
-
-
-class RowingRace:
-    def __init__(self, boat_type):
-        self.boat_type = boat_type
-        self.boats = []
-
-    def add_boat_to_start_line(self, boat):
-        if isinstance(boat, RowingBoat) and type(boat).__name__ == self.boat_type:
-            self.boats.append(boat)
-            return True
+    def ajout_bateau_ligne_depart(self, bateau):
+        if bateau.type_bateau() == self.type_course:
+            self.bateaux.append(bateau)
         else:
-            print("Impossible d'ajouter des navires")
-            return False
+            print(f"Le bateau {bateau.nom} n'est pas du bon type ({self.type_course}).")
 
-    def commence(self):
-        print("C'est parti")
+    def depart(self):
+        print("La course commence!")
 
-    def in_progress(self):
-        return any(boat.distance() < 2000 for boat in self.boats)
+    def en_cours(self):
+        return not self.terminee
 
-    def next_turn(self):
-        for boat in self.boats:
-            boat.row()
+    def next_loop(self):
+        for bateau in self.bateaux:
+            bateau.avancer()
+            if bateau.distance_parcourue >= 2: 
+                self.terminee = True
 
-    def display_positions(self):
-        positions = [f"{boat.name()},{int(boat.distance())}" for boat in self.boats]
-        return '\n'.join(positions)
+    def affiche_positions(self):
+        return "\n".join([bateau.afficher_position() for bateau in self.bateaux])
 
-    def winner(self):
-        random.shuffle(self.boats)
-        fastest_boat = max(self.boats, key=lambda b: b.average_speed)
-        return fastest_boat.name()
+    def vainqueur(self):
+        vainqueur = max(self.bateaux, key=lambda x: x.distance_parcourue)
+        return f"# Le bateau le plus rapide: {vainqueur.nom}"
 
+if __name__ == "__main__":
+    course_cadets = Course('2x')
+    bateau_1_2x = Bateau2x('mickey', 62)
+    bateau_2_2x = Bateau2x('minnie', 70)
+    bateau_3_skiff = BateauSkiff('picsou', 15)
 
-cadet_race = RowingRace('DoubleScullBoat')
-boat_1_2x = DoubleScullBoat('Mickey', 62)
-boat_2_2x = DoubleScullBoat('Minnie', 70)
-boat_3_skiff = SingleScullBoat('Scrooge', 120)
+    course_cadets.ajout_bateau_ligne_depart(bateau_1_2x)
+    course_cadets.ajout_bateau_ligne_depart(bateau_2_2x)
+    course_cadets.ajout_bateau_ligne_depart(bateau_3_skiff)
 
-cadet_race.add_boat_to_start_line(boat_1_2x)
-cadet_race.add_boat_to_start_line(boat_2_2x)
-cadet_race.add_boat_to_start_line(boat_3_skiff)
+    course_cadets.depart()
 
-cadet_race.commence()
+    with open("result.txt", "a") as f:
+        while course_cadets.en_cours():
+            course_cadets.next_loop()
+            positions = course_cadets.affiche_positions()
+            print(positions, flush=True)
+            f.write(positions + "\n")
 
-while cadet_race.in_progress():
-    cadet_race.next_turn()
-    print(cadet_race.display_positions())
-
-print("Le gagnant est :", cadet_race.winner())
+        print(course_cadets.vainqueur())
 
